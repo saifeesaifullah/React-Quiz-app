@@ -1,0 +1,71 @@
+
+
+
+
+
+
+// 📁 فایل: App.jsx (React)
+import { useEffect, useState } from 'react';
+import './index.css';
+
+export default function App() {
+  const [networks, setNetworks] = useState([]);
+  const [selected, setSelected] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    window.wifiAPI.getWifiList().then(setNetworks);
+  }, []);
+
+  const handleConnect = async () => {
+    if (!selected || !password) {
+      setMessage('لطفاً شبکه و رمز را وارد کنید');
+      return;
+    }
+    const success = await window.wifiAPI.connectWifi({ ssid: selected, password });
+    setMessage(success ? '✅ اتصال موفق!' : '❌ خطا در اتصال');
+  };
+
+  const generateRandomPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    let pass = '';
+    for (let i = 0; i < 10; i++) pass += chars[Math.floor(Math.random() * chars.length)];
+    setPassword(pass);
+  };
+
+  return (
+    <div className="p-6 space-y-4 text-center">
+      <h1 className="text-2xl font-bold">انتخاب وای‌فای</h1>
+      <select className="p-2 border rounded w-full" onChange={e => setSelected(e.target.value)}>
+        <option value="">انتخاب کنید</option>
+        {networks.map(ssid => <option key={ssid}>{ssid}</option>)}
+      </select>
+      <input
+        className="p-2 border rounded w-full"
+        type="text"
+        placeholder="رمز عبور یا تولید خودکار"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+      />
+      <div className="flex justify-between">
+        <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={generateRandomPassword}>رمز تصادفی</button>
+        <button className="bg-green-600 text-white px-4 py-2 rounded" onClick={handleConnect}>اتصال</button>
+      </div>
+      {message && <p className="text-sm mt-2">{message}</p>}
+    </div>
+  );
+}
+
+
+// 📁 فایل: index.css (Tailwind یا سفارشی)
+body {
+  font-family: sans-serif;
+  background-color: #f8fafc;
+  margin: 0;
+  padding: 0;
+}
+
+select, input, button {
+  font-size: 1rem;
+}
